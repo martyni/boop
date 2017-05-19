@@ -1,5 +1,5 @@
 source env/bin/activate
-if [ "$(boop)" == "I'm an app" ]
+if [ "$(poop)" == "I'm an app" ]
   then  
      echo success
      exit 0

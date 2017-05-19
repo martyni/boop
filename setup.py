@@ -10,7 +10,7 @@ setup(name='app',
       packages=['app'],
       zip_safe=False,
       entry_points = {
-         'console_scripts': ['poop=app:main'],
+         'console_scripts': ['boop=app:main'],
       },
       include_package_data=True
       )
