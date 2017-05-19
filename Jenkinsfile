@@ -5,22 +5,20 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'bash build.sh'
+                sh 'bash jenkins/build.sh'
             }
         }
         stage('Test') {
             steps {
                 echo 'Testing..'
                 sh 'pwd'
-                sh 'source env/bin/activate'
-                sh 'poop'
+                sh 'bash jenkins/test.sh'
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-                sh 'source env/bin/activate'
-                sh 'poop'
+                sh 'bash jenkins/deploy.sh'
             }
         }
     }
