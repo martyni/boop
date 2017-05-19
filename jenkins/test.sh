@@ -2,7 +2,7 @@ source env/bin/activate
 if [ "$(poop)" == "I'm an app" ]
   then  
      echo success
-     exit 1
+     exit 0
   else
      echo failure
      exit 1
