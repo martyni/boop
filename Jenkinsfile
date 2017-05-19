@@ -4,20 +4,26 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'pip install .' 
                 echo 'Building..'
+                sh 'pwd'
+                sh 'virtualenv env'
+                sh 'source env/bin/activate'
+                sh 'pip install .' 
             }
         }
         stage('Test') {
             steps {
-                sh 'poop'
                 echo 'Testing..'
+                sh 'pwd'
+                sh 'source env/bin/activate'
+                sh 'poop'
             }
         }
         stage('Deploy') {
             steps {
-                sh 'poop'
                 echo 'Deploying....'
+                sh 'source env/bin/activate'
+                sh 'poop'
             }
         }
     }
