@@ -5,10 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'pwd'
-                sh 'virtualenv env'
-                sh 'source env/bin/activate'
-                sh 'pip install .' 
+                sh 'bash build.sh'
             }
         }
         stage('Test') {
