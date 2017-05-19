@@ -4,20 +4,20 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                sh 'python setup.py install' 
                 echo 'Building..'
-                python setup.py install 
             }
         }
         stage('Test') {
             steps {
+                sh 'poop'
                 echo 'Testing..'
-                poop 
             }
         }
         stage('Deploy') {
             steps {
+                sh 'poop'
                 echo 'Deploying....'
-                poop
             }
         }
     }
