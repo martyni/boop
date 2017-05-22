@@ -2,9 +2,9 @@ from setuptools import setup
 from pip.req import parse_requirements
 import app
 
-install_reqs = parse_requirements('requirements.txt')
+install_reqs = parse_requirements('requirements.txt', session=False)
 
-reqs = [ str(ir.req) for i in install_reqs ]
+reqs = [ str(i.req) for i in install_reqs ]
 
 setup(name='app',
       version=app.__version__,
