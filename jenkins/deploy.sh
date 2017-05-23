@@ -1,2 +1,2 @@
 source env/bin/activate
-boop
+boop &

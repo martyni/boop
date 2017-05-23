@@ -1,9 +1,15 @@
 source env/bin/activate
-if [ "$(boop)" == "I'm an app" ]
+boop &
+sleep 1
+if [ "$(curl localhost:5000/test)" == "test" ]
   then  
      echo success
-     exit 0
+     EXIT=0
   else
      echo failure
-     exit 1
+     EXIT=1
 fi
+PID=$(ps aux | grep -v awk |awk /boop/'{print $2}')
+echo killing $PID
+kill $PID
+exit $EXIT

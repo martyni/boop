@@ -1,0 +1,7 @@
+{
+  "dev": {
+          "s3_bucket" : "martyni_lambda",
+          "app_function" : "app:main",
+          "parameter_depth": 1
+   }
+}
