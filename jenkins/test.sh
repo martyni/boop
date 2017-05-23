@@ -13,4 +13,4 @@ PID=$(ps aux | grep -v awk |awk /boop/'{print $2}')
 echo killing $PID
 kill $PID
 echo exit $EXIT
-exit $EXIT
+#exit $EXIT
