@@ -13,6 +13,7 @@ pipeline {
                 echo 'Testing..'
                 sh 'pwd'
                 sh 'bash jenkins/test.sh'
+                sh 'kill $PID || exit $EXIT'
             }
         }
         stage('Deploy') {
