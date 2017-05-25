@@ -1,7 +1,7 @@
 source env/bin/activate
 boop &
 sleep 1
-if [ "$(curl localhost:5000/test)" == "tested" ]
+if [ "$(curl localhost:5000/test)" == "OMG" ]
   then  
      echo success
      EXIT=0
