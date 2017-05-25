@@ -16,8 +16,5 @@ setup(name='app',
       install_requires=reqs,
       packages=['app'],
       zip_safe=False,
-      entry_points = {
-         'console_scripts': ['boop=app:main'],
-      },
       include_package_data=True
       )
