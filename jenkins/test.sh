@@ -4,10 +4,13 @@ sleep 1
 if [ "$(curl localhost:5000/test)" == "test" ]
   then  
      echo success
-     export EXIT=0
+     EXIT=0
   else
      echo failure
-     export EXIT=1
+     EXIT=1
+     
 fi
 export PID=$(ps aux | grep -v awk |awk /boop/'{print $2}')
 echo killing $PID
+echo $PID >/tmp/PID
+echo $EXIT >/tmp/EXIT

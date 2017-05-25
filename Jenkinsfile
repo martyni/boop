@@ -13,7 +13,8 @@ pipeline {
                 echo 'Testing..'
                 sh 'pwd'
                 sh 'bash jenkins/test.sh'
-                sh 'kill $PID || exit $EXIT'
+                sh 'kill $(cat /tmp/PID) || exit $(cat /tmp/EXIT)'
+                sh 'rm /tmp/PID) && rm /tmp/EXIT'
             }
         }
         stage('Deploy') {
