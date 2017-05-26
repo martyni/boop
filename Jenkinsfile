@@ -47,5 +47,19 @@ pipeline {
                 sh 'exit $(cat /tmp/EXIT)'
             }
         }
+        stage('Deploy prod') {
+            steps {
+                echo 'Deploying....'
+                sh 'bash jenkins/deploy.sh prod'
+                sh 'cat url'
+            }
+        }
+        stage('Test Prod') {
+            steps {
+                echo 'Testing.. stge'
+                sh 'bash jenkins/test.sh $(cat url)'
+                sh 'exit $(cat /tmp/EXIT)'
+            }
+        }
     }
 }

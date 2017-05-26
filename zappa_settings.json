@@ -9,4 +9,9 @@
           "app_function" : "my_app.app",
           "parameter_depth": 1
    }
+  "prod": {
+          "s3_bucket" : "martyni-lambda",
+          "app_function" : "my_app.app",
+          "parameter_depth": 1
+   }
 }
