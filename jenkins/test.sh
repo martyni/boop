@@ -9,7 +9,7 @@ if [ "$(curl localhost:5000/test)" == "OMG" ]
      echo failure
      failed=1
 fi
-if [ "$(curl localhost:5000/)" == "file" ]
+if [ "$(curl localhost:5000/)" == *"folder"* ]
   then  
      echo success
   else
