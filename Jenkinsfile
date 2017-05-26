@@ -32,12 +32,14 @@ pipeline {
                 sh 'bash jenkins/test.sh $(cat url)'
                 sh 'exit $(cat /tmp/EXIT)'
             }
+        }
         stage('Deploy stge') {
             steps {
                 echo 'Deploying....'
                 sh 'bash jenkins/deploy.sh stge'
                 sh 'cat url'
             }
+        }
         stage('Test Stage') {
             steps {
                 echo 'Testing.. stge'
