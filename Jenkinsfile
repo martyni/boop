@@ -28,11 +28,9 @@ pipeline {
         }
         stage('Test Dev') {
             steps {
-                echo 'Testing..'
-                sh 'pwd'
+                echo 'Testing.. Dev'
                 sh 'bash jenkins/test.sh $(cat url)'
-                sh 'kill $(cat /tmp/PID) || exit $(cat /tmp/EXIT)'
-                sh 'rm /tmp/PID && rm /tmp/EXIT'
+                sh 'exit $(cat /tmp/EXIT)'
             }
         }
     }
