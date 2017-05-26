@@ -12,7 +12,7 @@ def get_files(Bucket="martyni-boop", path="", folders=False):
     elif folders:
         return [f['Key'][:-1:] for f in contents if "/" in f['Key']]
 
-app.route('/test')
+@app.route('/test')
 def test():
    return 'OMG'
 

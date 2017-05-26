@@ -9,12 +9,19 @@ if [ "$(curl localhost:5000/test)" == "OMG" ]
      echo failure
      failed=1
 fi
-if [ "$(curl localhost:5000/)" == *"folder"* ]
+if [ "$(curl localhost:5000/| grep folder)" ]
   then  
      echo success
   else
      echo failure
      failed=1
+fi
+if [ "$(curl localhost:5000/| grep ballface)" ]
+  then  
+     echo failure
+     failed=1
+  else
+     echo success
 fi
 export PID=$(ps aux | grep -v awk |awk /boop/'{print $2}')
 echo killing $PID
