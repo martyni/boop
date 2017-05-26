@@ -21,6 +21,7 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 sh 'bash jenkins/deploy.sh'
+                sh 'cat url'
             }
         }
     }
