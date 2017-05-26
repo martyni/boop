@@ -12,16 +12,25 @@ pipeline {
             steps {
                 echo 'Testing..'
                 sh 'pwd'
-                sh 'bash jenkins/test.sh'
+                sh 'bash jenkins/test.sh localhost:5000'
                 sh 'kill $(cat /tmp/PID) || exit $(cat /tmp/EXIT)'
                 sh 'rm /tmp/PID && rm /tmp/EXIT'
             }
         }
-        stage('Deploy') {
+        stage('Deploy Dev') {
             steps {
                 echo 'Deploying....'
-                sh 'bash jenkins/deploy.sh'
+                sh 'bash jenkins/deploy_dev.sh'
                 sh 'cat url'
+            }
+        }
+        stage('Test Dev') {
+            steps {
+                echo 'Testing..'
+                sh 'pwd'
+                sh 'bash jenkins/test.sh $(cat url)'
+                sh 'kill $(cat /tmp/PID) || exit $(cat /tmp/EXIT)'
+                sh 'rm /tmp/PID && rm /tmp/EXIT'
             }
         }
     }

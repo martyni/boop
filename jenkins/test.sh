@@ -1,22 +1,23 @@
 source env/bin/activate
 boop &
 sleep 1
+url=$1
 failed=0
-if [ "$(curl localhost:5000/test)" == "OMG" ]
+if [ "$(curl $url/test)" == "OMG" ]
   then  
      echo success
   else
      echo failure
      failed=1
 fi
-if [ "$(curl localhost:5000/| grep folder)" ]
+if [ "$(curl $url/| grep folder)" ]
   then  
      echo success
   else
      echo failure
      failed=1
 fi
-if [ "$(curl localhost:5000/| grep ballface)" ]
+if [ "$(curl $url/| grep ballface)" ]
   then  
      echo failure
      failed=1
