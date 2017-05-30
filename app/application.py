@@ -7,12 +7,15 @@ from pprint import pprint
 app = Flask(__name__)
 client = boto3.client("s3")
 
+def url_sanitizer(raw_path):
+    if ".amazonaws.com" not in request.url:
+       return raw_path.replace('/prod', '').replace('/stge', '').replace('/dev', '')
+    else:
+       return raw_path
+
 def url_4(*args, **qwargs):
    raw_path = url_for(*args, **qwargs)
-   if ".amazonaws.com" not in request.url:
-      return raw_path.replace('/prod', '').replace('/stge', '').replace('/dev', '')
-   else:
-      return raw_path
+   return url_sanitizer(raw_path)
 
 def get_files(Bucket="martyni-boop", path="", folders=False):
     blob = client.list_objects_v2(Bucket="martyni-boop")
@@ -30,7 +33,7 @@ def api(path="/", error=None, meta={}):
             "meta": meta
             }
     payload["meta"]["date"] = str(datetime.datetime.utcnow())
-    payload["meta"]["url"]  = request.url
+    payload["meta"]["url"]  = url_sanitizer(request.url)
     payload["meta"]["remote_addr"]   = request.remote_addr
     payload["meta"]["user_agent"]   = str(request.user_agent)
     return json.dumps(payload)
