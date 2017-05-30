@@ -62,12 +62,7 @@ def get_series(Bucket="martyni-boop", path="", series=False, old=False):
         cache[path] = blob
     contents = blob['Contents']
     s3_list = [f['Key'] for f in contents]
-    if not old:
-       return  parse_series_and_episodes( s3_list )
-    elif not series:
-        return [f for f in s3_list if "/" not in f ]
-    elif series:
-        return [f[:-1:] for f in s3_list if "/" in f ]
+    return  parse_series_and_episodes( s3_list )
 
 
 
@@ -102,11 +97,7 @@ def error_test():
 
 @app.route('/')
 def list_files():
-    return request.url + ''.join(['<a href="{url}">{series}</a>'.format(url=url_4('series', name=folder), series=folder) for folder in get_series(series=True,old=True)])
-
-@app.route('/series/<name>')
-def series(name):
-   return str(get_series(path="/{}".format(name), old=True))
+    return url_4("/api")
 
 @app.route('/api')
 def api_root():

@@ -8,25 +8,11 @@ if [ "$(curl $url/test)" == "OMG" ]
      echo failure
      failed=1
 fi
-if [ "$(curl $url/| grep folder)" ]
-  then  
-     echo success
-  else
-     echo failure
-     failed=1
-fi
 if [ "$(curl $url/| grep ballface)" ]
   then  
      echo failure
      failed=1
   else
      echo success
-fi
-if [ "$(curl $url/| grep folder)" ]
-  then
-     echo success
-  else
-     echo failure
-     failed=1
 fi
 echo $failed >/tmp/EXIT
