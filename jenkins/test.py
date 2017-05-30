@@ -15,10 +15,10 @@ def test_path(path):
 def serializable(path):
     try:
         requests.get(base_url + path).json
-        print "success: {}".format(base_url + path)
+        print "serializable: {}".format(base_url + path)
         return 1
     except:
-        print "fail: {}".format(base_url + path)
+        print "not serializable: {}".format(base_url + path)
         return 0
 
 for path in "/", "/test", "/series/folder", "/api":
@@ -31,6 +31,7 @@ for path in ["/api"]:
 
 for path in ["/"]:
     if serializable(path):
+       print "exiting here"
        sys.exit(1)
 
 for path in ["/no_endpoint"]:
