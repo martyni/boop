@@ -97,7 +97,7 @@ def error_test():
 
 @app.route('/')
 def list_files():
-    return url_4("/api")
+    return "<a href={}>API</a>".format(url_4("api_root"))
 
 @app.route('/api')
 def api_root():
