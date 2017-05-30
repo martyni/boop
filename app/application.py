@@ -7,7 +7,7 @@ client = boto3.client("s3")
 
 def url_4(*args, **qwargs):
    raw_path = url_for(*args, **qwargs)
-   if ".amazonaws.com" not in raw_path:
+   if ".amazonaws.com" not in request.url:
       return raw_path.replace('/prod', '').replace('/stge', '').replace('/dev', '')
    else:
       return raw_path
