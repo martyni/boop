@@ -1,5 +1,7 @@
 from flask import Flask, request, url_for, redirect
 import boto3
+import datetime
+import json
 from pprint import pprint
 
 app = Flask(__name__)
@@ -20,6 +22,19 @@ def get_files(Bucket="martyni-boop", path="", folders=False):
     elif folders:
         return [f['Key'][:-1:] for f in contents if "/" in f['Key']]
 
+def api(path="/", error=None, meta={}):
+    payload = {
+            "error": error,
+            "path": path,
+            "data": None,
+            "meta": meta
+            }
+    payload["meta"]["date"] = str(datetime.datetime.utcnow())
+    payload["meta"]["url"]  = request.url
+    payload["meta"]["remote_addr"]   = request.remote_addr
+    payload["meta"]["user_agent"]   = str(request.user_agent)
+    return json.dumps(payload)
+    
 @app.route('/test')
 def test():
    return 'OMG'
@@ -31,6 +46,10 @@ def list_files():
 @app.route('/series/<name>')
 def series(name):
    return get_files(path="/{}".format(name))
+
+@app.route('/api')
+def api_root():
+    return api()
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0')
