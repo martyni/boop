@@ -67,23 +67,27 @@ def get_series(Bucket="martyni-boop", path="", series=False, old=False):
 
 
 def api(path="/", error=None, meta={}):
+    error_status_code = 400
     payload = {
             "error": error,
             "path": path,
             "data": {},
             "meta": meta
             }
-    payload["meta"]["date"] = str(datetime.datetime.utcnow())
-    payload["meta"]["url"]  = url_sanitizer(request.url)
-    payload["meta"]["remote_addr"]   = request.remote_addr
-    payload["meta"]["user_agent"]   = str(request.user_agent)
-    payload["data"]["series"] = get_series(path=path)
+    payload["meta"]["date"]        = str(datetime.datetime.utcnow())
+    payload["meta"]["url"]         = url_sanitizer(request.url)
+    payload["meta"]["remote_addr"] = request.remote_addr
+    payload["meta"]["user_agent"]  = str(request.user_agent)
+    payload["meta"]["status"]      = request.status_code
+
+    payload["data"]["series"]      = get_series(path=path)
     
     if not payload["error"]:
        return jsonify(payload)
     else:
+       payload["meta"]["status"] = error_status_code
        response = jsonify(payload)
-       response.status_code = 400
+       response.status_code = error_status_code
        return response 
 
 @app.route('/test')
