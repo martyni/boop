@@ -78,7 +78,7 @@ def api(path="/", error=None, meta={}):
     payload["meta"]["url"]         = url_sanitizer(request.url)
     payload["meta"]["remote_addr"] = request.remote_addr
     payload["meta"]["user_agent"]  = str(request.user_agent)
-    payload["meta"]["status"]      = request.status_code
+    payload["meta"]["status"]      = 200
 
     payload["data"]["series"]      = get_series(path=path)
     
