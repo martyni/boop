@@ -1,10 +1,13 @@
 from flask import Flask, request, url_for, redirect, jsonify
 import boto3
 import datetime
+import re
 from pprint import pprint
 
 app = Flask(__name__)
 client = boto3.client("s3")
+
+cache = {}
 
 def url_sanitizer(raw_path):
     if ".amazonaws.com" not in request.url:
@@ -16,13 +19,55 @@ def url_4(*args, **qwargs):
    raw_path = url_for(*args, **qwargs)
    return url_sanitizer(raw_path)
 
-def get_files(Bucket="martyni-boop", path="", folders=False):
-    blob = client.list_objects_v2(Bucket="martyni-boop")
+def parse_series_and_episodes(s3_list, path=None):
+   series = {}
+   c = 0
+   for _ in s3_list:
+       m = re.match(r'([a-z]*)/$', _)
+       if m:
+          series[m.group(1)] = {}
+          s3_list.pop(c)
+       c += 1
+   c = 0    
+   for _ in s3_list:
+       m = re.search(r'([a-z]*)/([0-9]*)/$', _)
+       if m:
+           series[m.group(1)][m.group(2)] = {}
+           s3_list.pop(c)
+       c += 1
+   c = 0     
+   for _ in s3_list:
+       m = re.search(r'([a-z]*)/([0-9]*)/(.*).mp3$', _)
+       if m:
+           series[m.group(1)][m.group(2)][m.group(3)] = {"mp3":m.group(0)} 
+           s3_list.pop(c)
+       c += 1
+
+   c = 0     
+   for _ in s3_list:
+       m = re.search(r'([a-z]*)/([0-9]*)/(.*).txt$', _)
+       if m:
+           series[m.group(1)][m.group(2)][m.group(3)]["txt"] = m.group(0) 
+           s3_list.pop(c)
+       c += 1
+   c = 0     
+   pprint(series)
+   return series   
+
+def get_series(Bucket="martyni-boop", path="", series=False, old=False):
+    if cache.get(path):
+        blob = cache.get(path)
+    else:
+        blob = client.list_objects_v2(Bucket="martyni-boop")
+        cache[path] = blob
     contents = blob['Contents']
-    if not folders:
-       return '\n'.join(f['Key'] for f in contents if "/" not in f['Key'])
-    elif folders:
-        return [f['Key'][:-1:] for f in contents if "/" in f['Key']]
+    s3_list = [f['Key'] for f in contents]
+    if not old:
+       return  parse_series_and_episodes( s3_list )
+    elif not series:
+        return [f for f in s3_list if "/" not in f ]
+    elif series:
+        return [f[:-1:] for f in s3_list if "/" in f ]
 
 
 
@@ -30,13 +75,15 @@ def api(path="/", error=None, meta={}):
     payload = {
             "error": error,
             "path": path,
-            "data": None,
+            "data": {},
             "meta": meta
             }
     payload["meta"]["date"] = str(datetime.datetime.utcnow())
     payload["meta"]["url"]  = url_sanitizer(request.url)
     payload["meta"]["remote_addr"]   = request.remote_addr
     payload["meta"]["user_agent"]   = str(request.user_agent)
+    payload["data"]["series"] = get_series(path=path)
+    
     if not payload["error"]:
        return jsonify(payload)
     else:
@@ -55,11 +102,11 @@ def error_test():
 
 @app.route('/')
 def list_files():
-    return request.url + ''.join(['<a href="{url}">{series}</a>'.format(url=url_4('series', name=folder), series=folder) for folder in get_files(folders=True)])
+    return request.url + ''.join(['<a href="{url}">{series}</a>'.format(url=url_4('series', name=folder), series=folder) for folder in get_series(series=True,old=True)])
 
 @app.route('/series/<name>')
 def series(name):
-   return get_files(path="/{}".format(name))
+   return str(get_series(path="/{}".format(name), old=True))
 
 @app.route('/api')
 def api_root():
