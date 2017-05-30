@@ -14,7 +14,7 @@ def test_path(path):
 
 def serializable(path):
     try:
-        requests.get(base_url + path).json
+        requests.get(base_url + path).json()
         print "serializable: {}".format(base_url + path)
         return 1
     except:
