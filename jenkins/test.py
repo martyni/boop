@@ -21,19 +21,30 @@ def serializable(path):
         print "not serializable: {}".format(base_url + path)
         return 0
 
+def check_this_errors(path):
+    if not requests.get(base_url + path):
+        print "errors: {}".format(base_url + path)
+        return 0
+    else:
+        print "no errors: {}".format(base_url + path)
+        return 1
+
 for path in "/", "/test", "/series/folder", "/api":
     if not test_path(path):
-       sys.exit(1)
+        sys.exit(1)
 
 for path in ["/api"]:
     if not serializable(path):
-       sys.exit(1)
+        sys.exit(1)
 
 for path in ["/"]:
     if serializable(path):
-       print "exiting here"
-       sys.exit(1)
+        sys.exit(1)
+
+for path in ["/error_test", "/no_endpoint"]:
+    if check_this_errors(path):
+        sys.exit(1)
 
 for path in ["/no_endpoint"]:
     if test_path(path):
-       sys.exit(1)
+        sys.exit(1)

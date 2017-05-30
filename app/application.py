@@ -1,7 +1,6 @@
-from flask import Flask, request, url_for, redirect
+from flask import Flask, request, url_for, redirect, jsonify
 import boto3
 import datetime
-import json
 from pprint import pprint
 
 app = Flask(__name__)
@@ -25,6 +24,8 @@ def get_files(Bucket="martyni-boop", path="", folders=False):
     elif folders:
         return [f['Key'][:-1:] for f in contents if "/" in f['Key']]
 
+
+
 def api(path="/", error=None, meta={}):
     payload = {
             "error": error,
@@ -36,11 +37,21 @@ def api(path="/", error=None, meta={}):
     payload["meta"]["url"]  = url_sanitizer(request.url)
     payload["meta"]["remote_addr"]   = request.remote_addr
     payload["meta"]["user_agent"]   = str(request.user_agent)
-    return json.dumps(payload)
-    
+    if not payload["error"]:
+       return jsonify(payload)
+    else:
+       response = jsonify(payload)
+       response.status_code = 400
+       return response 
+
 @app.route('/test')
 def test():
    return 'OMG'
+
+
+@app.route('/error_test')
+def error_test():
+   return api(path="error_test", error="here is an error")
 
 @app.route('/')
 def list_files():
@@ -53,6 +64,10 @@ def series(name):
 @app.route('/api')
 def api_root():
     return api()
+
+@app.route('/api/<path>')
+def api_path(path):
+    return api(path=path)
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0')
