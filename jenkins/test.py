@@ -25,11 +25,11 @@ for path in "/", "/test", "/series/folder", "/api":
     if not test_path(path):
        sys.exit(1)
 
-for path in "/api":
+for path in ["/api"]:
     if not serializable(path):
        sys.exit(1)
 
-for path in "/":
+for path in ["/"]:
     if serializable(path):
        sys.exit(1)
 
