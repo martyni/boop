@@ -1,11 +1,16 @@
 from flask import Flask, request, url_for, redirect
 import boto3
+from pprint import pprint
 
 app = Flask(__name__)
 client = boto3.client("s3")
 
 def url_4(*args, **qwargs):
-   return url_for(*args, **qwargs).replace('/prod', '')
+   raw_path = url_for(*args, **qwargs)
+   if ".amazonaws.com" not in raw_path:
+      return raw_path.replace('/prod', '').replace('/stge', '').replace('/dev', '')
+   else:
+      return raw_path
 
 def get_files(Bucket="martyni-boop", path="", folders=False):
     blob = client.list_objects_v2(Bucket="martyni-boop")
