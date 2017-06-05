@@ -11,6 +11,7 @@ client = boto3.client("s3")
 cache = {}
 time_format = "%Y-%M-%d %H:%M:%s"
 author = "Martyn Pratt"
+email = "martynjamespratt@gmail.com"
 s3_link = "https://s3-eu-west-1.amazonaws.com/{}/"
 
 def url_sanitizer(raw_path):
@@ -144,8 +145,8 @@ def rss_creation(path):
     fg.title( path.capitalize() )
     fg.description("a")
     fg.podcast.itunes_category('Technology', 'Podcasting')
-    fg.author({'name': 'Lars Kiesow', 'email': 'lkiesow@uos.de'})
-    fg.link(href='http://larskiesow.de/test.atom', rel='self')
+    fg.author({'name': author, 'email': email})
+    fg.link(href=request.url, rel='self')
     series = get_series(path=path)[path]
     series = {s:series[s]  for s in series if type(series[s]) == dict}
     for season in series:
@@ -155,18 +156,8 @@ def rss_creation(path):
             fe.title(series[season][episode]["mp3"])
             fe.description(get(series[season][episode]["txt"]).text)
             fe.enclosure(series[season][episode]["mp3"], 0, 'audio/mpeg')
-            fe.link(href='http://example.com', rel='alternate')
-            fe.id('http://lernfunk.de/_MEDIAID_123#1')
-            fe.title('First Element')
-            fe.content('''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Tamen
-                    aberramus a proposito, et, ne longius, prorsus, inquam, Piso, si
-                    ista mala sunt, placet. Aut etiam, ut vestitum, sic sententiam
-                    habeas aliam domesticam, aliam forensem, ut in fronte ostentatio
-                    sit, intus veritas occultetur? Cum id fugiunt, re eadem defendunt,
-                    quae Peripatetici, verba.''')
-            fe.summary(u'Lorem ipsum dolor sit amet, consectetur adipiscing elit')
-            fe.link(href='http://example.com', rel='alternate')
-            fe.author(name='Lars Kiesow', email='lkiesow@uos.de')
+            fe.link(href=request.url, rel='alternate')
+            fe.author(name=author, email=email)
     print fg.rss_str()
     return fg.rss_str()
 
