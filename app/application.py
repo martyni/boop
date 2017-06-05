@@ -158,8 +158,7 @@ def rss_creation(path):
             fe.enclosure(series[season][episode]["mp3"], 0, 'audio/mpeg')
             fe.link(href=request.url, rel='alternate')
             fe.author(name=author, email=email)
-    print fg.rss_str()
-    return fg.rss_str()
+    return Response(fg.rss_str(), mimetype='text/xml')
 
 @app.route('/api')
 def api_root():
