@@ -143,17 +143,17 @@ def rss_creation(path):
     fg.load_extension('podcast')
     fg.id(url_sanitizer(request.url))
     fg.title( path.capitalize() )
-    fg.description("a")
     fg.podcast.itunes_category('Technology', 'Podcasting')
     fg.author({'name': author, 'email': email})
-    fg.link(href=request.url, rel='self')
+    fg.link(href=url_sanitizer(request.url), rel='self')
     series = get_series(path=path)[path]
-    series = {s:series[s]  for s in series if type(series[s]) == dict}
+    fg.description(series.get("description","generic podcast"))
+    series = {s:series[s] for s in series if type(series[s]) == dict}
     for season in series:
         for episode in series[season]:
             fe = fg.add_entry()
             fe.id(series[season][episode]["mp3"])
-            fe.title(series[season][episode]["mp3"])
+            fe.title(episode)
             fe.description(get(series[season][episode]["txt"]).text)
             fe.enclosure(series[season][episode]["mp3"], 0, 'audio/mpeg')
             fe.link(href=request.url, rel='alternate')
