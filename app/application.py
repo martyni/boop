@@ -2,12 +2,12 @@ from flask import Flask, request, url_for, redirect, jsonify
 import boto3
 import datetime
 import re
-from pprint import pprint
 
 app = Flask(__name__)
 client = boto3.client("s3")
 
 cache = {}
+time_format = "%Y-%M-%d %H:%M:%s"
 
 def url_sanitizer(raw_path):
     if ".amazonaws.com" not in request.url:
@@ -19,11 +19,25 @@ def url_4(*args, **qwargs):
    raw_path = url_for(*args, **qwargs)
    return url_sanitizer(raw_path)
 
+
+def time_dump():
+    return datetime.datetime.utcnow().strftime(time_format)
+
+def time_load(time_string):
+    return datetime.datetime.strptime(time_string, time_format)
+
+def time_diff(time_1, time_2):
+    if type(time_1) == str:
+        time_1 = datetime.datetime.strptime(time_1,  time_format)
+    if type(time_2) == str:
+        time_2 = datetime.datetime.strptime(time_2,  time_format)
+    return time_1 - time_2 
+
 def parse_series_and_episodes(s3_list, path=None):
    series = {}
    c = 0
    for _ in s3_list:
-       m = re.match(r'([a-z]*)/$', _)
+       m = re.match(r'([a-z\s]*)/$', _)
        if m:
           series[m.group(1)] = {}
           s3_list.pop(c)
@@ -51,15 +65,16 @@ def parse_series_and_episodes(s3_list, path=None):
            s3_list.pop(c)
        c += 1
    c = 0     
-   pprint(series)
    return series   
 
 def get_series(Bucket="martyni-boop", path="", series=False, old=False):
     if cache.get(path):
         blob = cache.get(path)
+        
     else:
         blob = client.list_objects_v2(Bucket="martyni-boop")
         cache[path] = blob
+        cache[path]["date"] = time_dump()
     contents = blob['Contents']
     s3_list = [f['Key'] for f in contents]
     return  parse_series_and_episodes( s3_list )
@@ -74,7 +89,7 @@ def api(path="/", error=None, meta={}):
             "data": {},
             "meta": meta
             }
-    payload["meta"]["date"]        = str(datetime.datetime.utcnow())
+    payload["meta"]["date"]        = time_dump()
     payload["meta"]["url"]         = url_sanitizer(request.url)
     payload["meta"]["remote_addr"] = request.remote_addr
     payload["meta"]["user_agent"]  = str(request.user_agent)
