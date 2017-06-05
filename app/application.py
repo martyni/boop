@@ -91,10 +91,13 @@ def get_series(Bucket="martyni-boop", path="", series=False, old=False):
         blob = client.list_objects_v2(Bucket="martyni-boop", Prefix=path_sanitizer(path))
         cache[path] = blob
         cache[path]["date"] = time_dump()
-    contents = blob['Contents']
-    s3_list = [f['Key'] for f in contents]
-    return  parse_series_and_episodes( s3_list, path, s3_link=s3_link.format(Bucket) )
-
+    contents = blob.get('Contents', None)
+    if contents is not None:
+       s3_list = [f['Key'] for f in contents]
+       return  parse_series_and_episodes( s3_list, path, s3_link=s3_link.format(Bucket) )
+    else:
+       blob["error"] = "No Contents found in S3"
+       return blob
 
 
 def api(path="", error=None, meta={}):
@@ -103,7 +106,7 @@ def api(path="", error=None, meta={}):
     payload = {
             "error": error,
             "path": path,
-            "data": {},
+            "response": {},
             "meta": meta
             }
     payload["meta"]["date"]        = time_dump()
@@ -111,9 +114,10 @@ def api(path="", error=None, meta={}):
     payload["meta"]["remote_addr"] = request.remote_addr
     payload["meta"]["user_agent"]  = str(request.user_agent)
     payload["meta"]["status"]      = 200
-
-    payload["data"]["series"]      = get_series(path=path)
-    if not payload["data"]["series"]:
+    payload["response"]      = get_series(path=path)
+    if payload["response"].get("error"):
+        payload["error"] = payload["response"]["error"]
+    if not payload["response"]:
         payload["error"] = "Series {} not found".format(path)
     if not payload["error"]:
        return jsonify(payload)
@@ -146,7 +150,10 @@ def rss_creation(path):
     fg.podcast.itunes_category('Technology', 'Podcasting')
     fg.author({'name': author, 'email': email})
     fg.link(href=url_sanitizer(request.url), rel='self')
-    series = get_series(path=path)[path]
+    raw_series = get_series(path=path)
+    series = raw_series.get(path)
+    if not series:
+        return api(path=request.path, error="No Series found", meta={"s3_response": raw_series}) 
     fg.description(series.get("description","generic podcast"))
     series = { s:series[s] for s in series if type(series[s]) == dict }
     for season in series:
