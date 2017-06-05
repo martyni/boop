@@ -41,7 +41,7 @@ for path in ["/"]:
     if serializable(path):
         sys.exit(1)
 
-for path in ["/error_test", "/no_endpoint"]:
+for path in ["/error_test", "/no_endpoint", "/api/no_series_here"]:
     if check_this_errors(path):
         sys.exit(1)
 
