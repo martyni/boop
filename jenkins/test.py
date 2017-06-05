@@ -29,7 +29,7 @@ def check_this_errors(path):
         print "no errors: {}".format(base_url + path)
         return 1
 
-for path in "/", "/test", "/api":
+for path in "/", "/test", "/api" , "/rss/folder":
     if not test_path(path):
         sys.exit(1)
 

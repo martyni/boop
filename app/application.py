@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for, redirect, jsonify
+from flask import Flask, Response, request, url_for, redirect, jsonify
 from feedgen.feed import FeedGenerator
 import boto3
 import datetime
