@@ -1,19 +1,26 @@
 from flask import Flask, request, url_for, redirect, jsonify
+from feedgen.feed import FeedGenerator
 import boto3
 import datetime
 import re
+from requests import get
 
 app = Flask(__name__)
 client = boto3.client("s3")
 
 cache = {}
 time_format = "%Y-%M-%d %H:%M:%s"
+author = "Martyn Pratt"
+s3_link = "https://s3-eu-west-1.amazonaws.com/{}/"
 
 def url_sanitizer(raw_path):
     if ".amazonaws.com" not in request.url:
        return raw_path.replace('/prod', '').replace('/stge', '').replace('/dev', '')
     else:
        return raw_path
+
+def path_sanitizer(raw_path):
+    return raw_path.lower().replace("_", " ")
 
 def url_4(*args, **qwargs):
    raw_path = url_for(*args, **qwargs)
@@ -33,12 +40,11 @@ def time_diff(time_1, time_2):
         time_2 = datetime.datetime.strptime(time_2,  time_format)
     return time_1 - time_2 
 
-def parse_series_and_episodes(s3_list, path=None):
+def parse_series_and_episodes(s3_list, path=None, s3_link=""):
    series = {}
    c = 0
    if not path:
        path = '[a-z\s]*'
-   print '({})/$'.format(path)
    for _ in s3_list:
        m = re.match('({})/$'.format(path), _)
        if m:
@@ -54,9 +60,16 @@ def parse_series_and_episodes(s3_list, path=None):
        c += 1
    c = 0     
    for _ in s3_list:
+       m = re.search('({})/description.txt$'.format(path), _)
+       if m:
+           series[m.group(1)]["description"] = get(s3_link.format(path) + m.group(1) + '/description.txt').text
+           s3_list.pop(c)
+       c += 1
+   c = 0     
+   for _ in s3_list:
        m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
        if m:
-           series[m.group(1)][m.group(2)][m.group(3)] = {"mp3":m.group(0)} 
+           series[m.group(1)][m.group(2)][m.group(3)] = {"mp3": s3_link + m.group(0)} 
            s3_list.pop(c)
        c += 1
 
@@ -64,7 +77,7 @@ def parse_series_and_episodes(s3_list, path=None):
    for _ in s3_list:
        m = re.search('({})/([0-9]*)/(.*).txt$'.format(path), _)
        if m:
-           series[m.group(1)][m.group(2)][m.group(3)]["txt"] = m.group(0) 
+           series[m.group(1)][m.group(2)][m.group(3)]["txt"] = s3_link + m.group(0) 
            s3_list.pop(c)
        c += 1
    c = 0     
@@ -79,13 +92,13 @@ def get_series(Bucket="martyni-boop", path="", series=False, old=False):
         cache[path]["date"] = time_dump()
     contents = blob['Contents']
     s3_list = [f['Key'] for f in contents]
-    return  parse_series_and_episodes( s3_list, path )
+    return  parse_series_and_episodes( s3_list, path, s3_link=s3_link.format(Bucket) )
 
 
 
 def api(path="", error=None, meta={}):
     error_status_code = 400
-    path=path.lower().replace("_", " ")
+    path = path_sanitizer(path)
     payload = {
             "error": error,
             "path": path,
@@ -121,6 +134,41 @@ def error_test():
 @app.route('/')
 def list_files():
     return "<a href={}>API</a>".format(url_4("api_root"))
+
+@app.route('/rss/<path>')
+def rss_creation(path):
+    path = path_sanitizer(path)
+    fg = FeedGenerator()
+    fg.load_extension('podcast')
+    fg.id(url_sanitizer(request.url))
+    fg.title( path.capitalize() )
+    fg.description("a")
+    fg.podcast.itunes_category('Technology', 'Podcasting')
+    fg.author({'name': 'Lars Kiesow', 'email': 'lkiesow@uos.de'})
+    fg.link(href='http://larskiesow.de/test.atom', rel='self')
+    series = get_series(path=path)[path]
+    series = {s:series[s]  for s in series if type(series[s]) == dict}
+    for season in series:
+        for episode in series[season]:
+            fe = fg.add_entry()
+            fe.id(series[season][episode]["mp3"])
+            fe.title(series[season][episode]["mp3"])
+            fe.description(get(series[season][episode]["txt"]).text)
+            fe.enclosure(series[season][episode]["mp3"], 0, 'audio/mpeg')
+            fe.link(href='http://example.com', rel='alternate')
+            fe.id('http://lernfunk.de/_MEDIAID_123#1')
+            fe.title('First Element')
+            fe.content('''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Tamen
+                    aberramus a proposito, et, ne longius, prorsus, inquam, Piso, si
+                    ista mala sunt, placet. Aut etiam, ut vestitum, sic sententiam
+                    habeas aliam domesticam, aliam forensem, ut in fronte ostentatio
+                    sit, intus veritas occultetur? Cum id fugiunt, re eadem defendunt,
+                    quae Peripatetici, verba.''')
+            fe.summary(u'Lorem ipsum dolor sit amet, consectetur adipiscing elit')
+            fe.link(href='http://example.com', rel='alternate')
+            fe.author(name='Lars Kiesow', email='lkiesow@uos.de')
+    print fg.rss_str()
+    return fg.rss_str()
 
 @app.route('/api')
 def api_root():
