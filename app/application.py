@@ -88,7 +88,7 @@ def get_series(Bucket="martyni-boop", path="", series=False, old=False):
     if cache.get(path):
         blob = cache.get(path)
     else:
-        blob = client.list_objects_v2(Bucket="martyni-boop")
+        blob = client.list_objects_v2(Bucket="martyni-boop", Prefix=path_sanitizer(path))
         cache[path] = blob
         cache[path]["date"] = time_dump()
     contents = blob['Contents']
@@ -148,7 +148,7 @@ def rss_creation(path):
     fg.link(href=url_sanitizer(request.url), rel='self')
     series = get_series(path=path)[path]
     fg.description(series.get("description","generic podcast"))
-    series = {s:series[s] for s in series if type(series[s]) == dict}
+    series = { s:series[s] for s in series if type(series[s]) == dict }
     for season in series:
         for episode in series[season]:
             fe = fg.add_entry()
