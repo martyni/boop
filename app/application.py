@@ -36,22 +36,25 @@ def time_diff(time_1, time_2):
 def parse_series_and_episodes(s3_list, path=None):
    series = {}
    c = 0
+   if not path:
+       path = '[a-z\s]*'
+   print '({})/$'.format(path)
    for _ in s3_list:
-       m = re.match(r'([a-z\s]*)/$', _)
+       m = re.match('({})/$'.format(path), _)
        if m:
           series[m.group(1)] = {}
           s3_list.pop(c)
        c += 1
    c = 0    
    for _ in s3_list:
-       m = re.search(r'([a-z]*)/([0-9]*)/$', _)
+       m = re.search('({})/([0-9]*)/$'.format(path), _)
        if m:
            series[m.group(1)][m.group(2)] = {}
            s3_list.pop(c)
        c += 1
    c = 0     
    for _ in s3_list:
-       m = re.search(r'([a-z]*)/([0-9]*)/(.*).mp3$', _)
+       m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
        if m:
            series[m.group(1)][m.group(2)][m.group(3)] = {"mp3":m.group(0)} 
            s3_list.pop(c)
@@ -59,7 +62,7 @@ def parse_series_and_episodes(s3_list, path=None):
 
    c = 0     
    for _ in s3_list:
-       m = re.search(r'([a-z]*)/([0-9]*)/(.*).txt$', _)
+       m = re.search('({})/([0-9]*)/(.*).txt$'.format(path), _)
        if m:
            series[m.group(1)][m.group(2)][m.group(3)]["txt"] = m.group(0) 
            s3_list.pop(c)
@@ -70,19 +73,19 @@ def parse_series_and_episodes(s3_list, path=None):
 def get_series(Bucket="martyni-boop", path="", series=False, old=False):
     if cache.get(path):
         blob = cache.get(path)
-        
     else:
         blob = client.list_objects_v2(Bucket="martyni-boop")
         cache[path] = blob
         cache[path]["date"] = time_dump()
     contents = blob['Contents']
     s3_list = [f['Key'] for f in contents]
-    return  parse_series_and_episodes( s3_list )
+    return  parse_series_and_episodes( s3_list, path )
 
 
 
-def api(path="/", error=None, meta={}):
+def api(path="", error=None, meta={}):
     error_status_code = 400
+    path=path.replace("_", " ")
     payload = {
             "error": error,
             "path": path,
@@ -96,7 +99,8 @@ def api(path="/", error=None, meta={}):
     payload["meta"]["status"]      = 200
 
     payload["data"]["series"]      = get_series(path=path)
-    
+    if not payload["data"]["series"]:
+        payload["error"] = "Series {} not found".format(path)
     if not payload["error"]:
        return jsonify(payload)
     else:
