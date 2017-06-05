@@ -85,7 +85,7 @@ def get_series(Bucket="martyni-boop", path="", series=False, old=False):
 
 def api(path="", error=None, meta={}):
     error_status_code = 400
-    path=path.lowercase().replace("_", " ")
+    path=path.lower().replace("_", " ")
     payload = {
             "error": error,
             "path": path,
