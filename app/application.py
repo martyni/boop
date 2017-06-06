@@ -143,7 +143,7 @@ def rss_creation(path):
     fg = FeedGenerator()
     fg.load_extension('podcast')
     fg.id(url_sanitizer(request.url))
-    fg.title(path_sanitizer(path).capitalize())
+    fg.title(path_sanitizer(path).title())
     fg.podcast.itunes_category('Technology', 'Podcasting')
     fg.author({'name': author, 'email': email})
     fg.link(href=url_sanitizer(request.url), rel='self')
@@ -157,7 +157,7 @@ def rss_creation(path):
         for episode in series[season]:
             fe = fg.add_entry()
             fe.id(series[season][episode]["mp3"])
-            fe.title(episode)
+            fe.title(path_sanitizer(episode).title())
             fe.description(get(series[season][episode]["txt"]).text)
             fe.enclosure(series[season][episode]["mp3"], 0, 'audio/mpeg')
             fe.link(href=request.url, rel='alternate')
