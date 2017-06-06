@@ -140,6 +140,7 @@ def error_test():
 def list_files():
     return "<a href={}>API</a>".format(url_4("api_root"))
 
+
 @app.route('/rss/<path>')
 def rss_creation(path):
     path = path_sanitizer(path)
