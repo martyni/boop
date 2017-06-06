@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, url_for, redirect, jsonify
+from flask import Flask, Response, request, url_for, redirect, jsonify, render_template
 from feedgen.feed import FeedGenerator
 import boto3
 import datetime
@@ -139,7 +139,7 @@ def error_test():
 
 @app.route('/')
 def list_files():
-    return "<a href={}>API</a>".format(url_4("api_root"))
+    return render_template("base.html", links={"api_root": url_4("api_root")})
 
 
 @app.route('/rss/<path>')

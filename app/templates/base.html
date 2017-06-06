@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>
+    <body>
+    <table border = 1>
+        {% for slug, url in links.iteritems() %}	    
+             <tr>
+                 <td> <a href="{{ url }}"> {{ slug }} </a></td>
+             </tr>
+        {% endfor %}
+    </table>	    
+    </body>
+</html>
