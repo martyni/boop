@@ -15,6 +15,9 @@ setup(name='app',
       license='MIT',
       install_requires=reqs,
       packages=['app'],
+      package_data={
+               'app.templates': ['*']     
+                },
       zip_safe=False,
       entry_points = {
                'console_scripts': ['boop=app:app.run'],
