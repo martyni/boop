@@ -65,10 +65,10 @@ def parse_series_and_episodes(s3_list, path=None, s3_link=""):
             series[m.group(1)]["description"] = get(
                 s3_link.format(path) + m.group(1) + '/description.txt').text
 
-        m = re.search('({})/([a-z\s]*)\.png$'.format(path), _)
+        m = re.search('({})/([a-z_]*)\.png$'.format(path), _)
         if m:
             series[m.group(1)]["image"] = s3_link.format(path) + m.group(0) 
-            series[m.group(1)]["image_title"] = m.group(2).title() 
+            series[m.group(1)]["image_title"] = path_sanitizer(m.group(2)).title() 
 
         m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
         if m:
