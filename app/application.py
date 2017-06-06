@@ -139,7 +139,7 @@ def error_test():
 
 @app.route('/')
 def list_files():
-    return render_template("base.html", links={"api_root": url_4("api_root")})
+    return render_template("base.py", links={"api_root": url_4("api_root")})
 
 
 @app.route('/rss/<path>')
