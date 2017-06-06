@@ -160,7 +160,7 @@ def rss_creation(path):
     fg = FeedGenerator()
     fg.load_extension('podcast')
     fg.id(url_sanitizer(request.url))
-    fg.title(path.capitalize())
+    fg.title(path_sanitizer(path).capitalize())
     fg.podcast.itunes_category('Technology', 'Podcasting')
     fg.author({'name': author, 'email': email})
     fg.link(href=url_sanitizer(request.url), rel='self')
