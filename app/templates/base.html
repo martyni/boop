@@ -7,6 +7,7 @@
 	</script>
     </head>
     <body>
+
     <table border = 1>
         {% for slug, url in links.iteritems() %}	    
              <tr>
@@ -14,5 +15,27 @@
              </tr>
         {% endfor %}
     </table>	    
+        <div id="main">
+        </div>	    
     </body>
+    <script >
+    root = $.getJSON('/api');
+    function onLoad() { 
+            $.each(  j.responseJSON.response,  function(show) 
+	        {
+	            $("#main").append( 
+	                $('<a>', 
+	                    {
+	                id: show 
+                        href: '/rss/' + show.replace(" ", "_"),
+	                rel: 'external',
+	                text: show + " RSS"
+	                     }    
+	                 )
+                     )
+                }
+            )
+	};
+    $(document).ready( onLoad())	
+    </script>
 </html>
