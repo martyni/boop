@@ -49,48 +49,31 @@ def time_diff(time_1, time_2):
 
 def parse_series_and_episodes(s3_list, path=None, s3_link=""):
     series = {}
-    c = 0
     if not path:
         path = '[a-z\s]*'
     for _ in s3_list:
         m = re.match('({})/$'.format(path), _)
         if m:
             series[m.group(1)] = {}
-            s3_list.pop(c)
-        c += 1
-    c = 0
-    for _ in s3_list:
         m = re.search('({})/([0-9]*)/$'.format(path), _)
         if m:
             series[m.group(1)][m.group(2)] = {}
-            s3_list.pop(c)
-        c += 1
-    c = 0
-    for _ in s3_list:
         m = re.search('({})/description.txt$'.format(path), _)
         if m:
             series[m.group(1)]["description"] = get(
                 s3_link.format(path) + m.group(1) + '/description.txt').text
-            s3_list.pop(c)
-        c += 1
-    c = 0
-    for _ in s3_list:
         m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
         if m:
             series[m.group(1)][m.group(2)][m.group(3)] = {
                 "mp3": s3_link + m.group(0)}
-            s3_list.pop(c)
-        c += 1
-
-    c = 0
-    for _ in s3_list:
+        m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
+        if m:
+            series[m.group(1)][m.group(2)][m.group(3)] = {
+                "mp3": s3_link + m.group(0)}
         m = re.search('({})/([0-9]*)/(.*).txt$'.format(path), _)
         if m:
             series[m.group(1)][m.group(2)][m.group(
                 3)]["txt"] = s3_link + m.group(0)
-            s3_list.pop(c)
-        c += 1
-    c = 0
     return series
 
 
