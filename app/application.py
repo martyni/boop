@@ -55,21 +55,26 @@ def parse_series_and_episodes(s3_list, path=None, s3_link=""):
         m = re.match('({})/$'.format(path), _)
         if m:
             series[m.group(1)] = {}
+
         m = re.search('({})/([0-9]*)/$'.format(path), _)
         if m:
             series[m.group(1)][m.group(2)] = {}
+
         m = re.search('({})/description.txt$'.format(path), _)
         if m:
             series[m.group(1)]["description"] = get(
                 s3_link.format(path) + m.group(1) + '/description.txt').text
+
+        m = re.search('({})/([a-z\s]*)\.png$'.format(path), _)
+        if m:
+            series[m.group(1)]["image"] = s3_link.format(path) + m.group(0) 
+            series[m.group(1)]["image_title"] = m.group(2).title() 
+
         m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
         if m:
             series[m.group(1)][m.group(2)][m.group(3)] = {
                 "mp3": s3_link + m.group(0)}
-        m = re.search('({})/([0-9]*)/(.*).mp3$'.format(path), _)
-        if m:
-            series[m.group(1)][m.group(2)][m.group(3)] = {
-                "mp3": s3_link + m.group(0)}
+
         m = re.search('({})/([0-9]*)/(.*).txt$'.format(path), _)
         if m:
             series[m.group(1)][m.group(2)][m.group(
@@ -139,19 +144,28 @@ def list_files():
 
 @app.route('/rss/<path>')
 def rss_creation(path):
-    path = path_sanitizer(path)
-    fg = FeedGenerator()
-    fg.load_extension('podcast')
-    fg.id(url_sanitizer(request.url))
-    fg.title(path_sanitizer(path).title())
-    fg.podcast.itunes_category('Technology', 'Podcasting')
-    fg.author({'name': author, 'email': email})
-    fg.link(href=url_sanitizer(request.url), rel='self')
-    raw_series = get_series(path=path)
-    series = raw_series.get(path)
+    path        = path_sanitizer(path)
+    title       = path.title()
+    url         = url_sanitizer(request.url)
+    raw_series  = get_series(path=path)
+    series      = raw_series.get(path)
     if not series:
         return api(path=request.path, error="No Series found", meta={"s3_response": raw_series})
-    fg.description(series.get("description", "generic podcast"))
+    description = series.get("description", "generic podcast")
+    fg          = FeedGenerator()
+    fg.load_extension('podcast')
+    fg.id(url)
+    fg.title(title)
+    fg.podcast.itunes_category('Technology', 'Podcasting')
+    fg.author({'name': author, 'email': email})
+    fg.link(href=url, rel='self')
+    fg.description(description)
+    fg.image(url=series.get("image", "https://s3-eu-west-1.amazonaws.com/martyni-boop/default.png"),
+             title=series.get("image_title", "Default"),
+             link="http://blah.com/image",
+             width='123',
+             height='123',
+             description=description)
     series = {s: series[s] for s in series if type(series[s]) == dict}
     for season in series:
         for episode in series[season]:
