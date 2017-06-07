@@ -20,7 +20,7 @@
         {% endfor %}
     </table>	    
     </body>
-    {% for slug, url in links.iteritems()[0] %}
+    {% for slug, url in links.iteritems() %}
     <script >
 function onLoad() { json = $.getJSON('{{ url }}').done( function () {
        $.each(json.responseJSON.response,  function(show) {
