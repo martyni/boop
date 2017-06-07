@@ -2,40 +2,34 @@
 <html>
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script type=text/javascript>
              $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
     </head>
     <body>
 
-    <table border = 1>
+    <table id="main" class="table table-striped">
         {% for slug, url in links.iteritems() %}	    
              <tr>
-                 <td> <a href="{{ url }}"> {{ slug }} </a></td>
+		 <td>
+                    <a href="{{ url }}"> {{ slug }} </a>
+		 </td>
              </tr>
         {% endfor %}
     </table>	    
-        <div id="main">
-        </div>	    
     </body>
     <script >
-    root = $.getJSON('/api');
-    function onLoad() { 
-            $.each(  j.responseJSON.response,  function(show) 
-	        {
-	            $("#main").append( 
-	                $('<a>', 
-	                    {
-	                id: show 
-                        href: '/rss/' + show.replace(" ", "_"),
-	                rel: 'external',
-	                text: show + " RSS"
-	                     }    
-	                 )
-                     )
-                }
-            )
-	};
+    function onLoad() { json = $.getJSON('/api').done( function () {
+       $.each(json.responseJSON.response,  function(show) {
+			element = '<tr><td><a href="/rss/' + show.split(" ").join('_') + '">' + show + ' RSS</a></td></tr>';
+                        console.log(element);
+			$("#main ").find("tbody").append(element); 
+          }
+       )}
+    )}
     $(document).ready( onLoad())	
     </script>
 </html>
+
