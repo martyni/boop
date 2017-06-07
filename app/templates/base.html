@@ -21,7 +21,7 @@
     </table>	    
     </body>
     <script >
-    function onLoad() { json = $.getJSON('/api').done( function () {
+function onLoad() { json = $.getJSON('{{ url }}').done( function () {
        $.each(json.responseJSON.response,  function(show) {
 			element = '<tr><td><a href="/rss/' + show.split(" ").join('_') + '">' + show + ' RSS</a></td></tr>';
                         console.log(element);
