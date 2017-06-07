@@ -139,7 +139,10 @@ def error_test():
 
 @app.route('/')
 def list_files():
-    return render_template("base.html", links={"api_root": url_4("api_root")})
+    request_path = request.path
+    request_path = request_path + "/" if request_path[-1] != "/" else request_path
+    print request_path
+    return render_template("base.html", request_path=request_path, links={"api_root": url_4("api_root")})
 
 
 @app.route('/rss/<path>')
