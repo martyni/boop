@@ -1,7 +1,8 @@
-from flask import Flask, Response, request, url_for, redirect, jsonify, render_template
+from flask import Flask, Response, request, url_for, redirect, jsonify, render_template, make_response, request, current_app
 from feedgen.feed import FeedGenerator
 import boto3
-import datetime
+from datetime import datetime, timedelta
+from functools import update_wrapper
 import re
 from requests import get
 
@@ -32,19 +33,60 @@ def url_4(*args, **qwargs):
 
 
 def time_dump():
-    return datetime.datetime.utcnow().strftime(time_format)
+    return datetime.utcnow().strftime(time_format)
 
 
 def time_load(time_string):
-    return datetime.datetime.strptime(time_string, time_format)
+    return datetime.strptime(time_string, time_format)
 
 
 def time_diff(time_1, time_2):
     if type(time_1) == str:
-        time_1 = datetime.datetime.strptime(time_1,  time_format)
+        time_1 = datetime.strptime(time_1,  time_format)
     if type(time_2) == str:
-        time_2 = datetime.datetime.strptime(time_2,  time_format)
+        time_2 = datetime.strptime(time_2,  time_format)
     return time_1 - time_2
+
+def crossdomain(origin=None, methods=None, headers=None,
+                max_age=21600, attach_to_all=True,
+                automatic_options=True):
+    if methods is not None:
+        methods = ', '.join(sorted(x.upper() for x in methods))
+    if headers is not None and not isinstance(headers, basestring):
+        headers = ', '.join(x.upper() for x in headers)
+    if not isinstance(origin, basestring):
+        origin = ', '.join(origin)
+    if isinstance(max_age, timedelta):
+        max_age = max_age.total_seconds()
+
+    def get_methods():
+        if methods is not None:
+            return methods
+
+        options_resp = current_app.make_default_options_response()
+        return options_resp.headers['allow']
+
+    def decorator(f):
+        def wrapped_function(*args, **kwargs):
+            if automatic_options and request.method == 'OPTIONS':
+                resp = current_app.make_default_options_response()
+            else:
+                resp = make_response(f(*args, **kwargs))
+            if not attach_to_all and request.method != 'OPTIONS':
+                return resp
+
+            h = resp.headers
+
+            h['Access-Control-Allow-Origin'] = origin
+            h['Access-Control-Allow-Methods'] = get_methods()
+            h['Access-Control-Max-Age'] = str(max_age)
+            if headers is not None:
+                h['Access-Control-Allow-Headers'] = headers
+            return resp
+
+        f.provide_automatic_options = False
+        return update_wrapper(wrapped_function, f)
+    return decorator
 
 
 def parse_series_and_episodes(s3_list, path=None, s3_link=""):
@@ -183,11 +225,13 @@ def rss_creation(path):
 
 
 @app.route('/api')
+@crossdomain("*")
 def api_root():
     return api()
 
 
 @app.route('/api/<path>')
+@crossdomain("*")
 def api_path(path):
     return api(path=path)
 
